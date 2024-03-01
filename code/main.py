@@ -79,4 +79,4 @@ plot.ylabel("Discounted Return")
 plot.show()
 plot.savefig(f"{rooms_instance}.png")
 
-env.save_video()
+# env.save_video()
