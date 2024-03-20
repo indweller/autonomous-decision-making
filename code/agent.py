@@ -5,6 +5,7 @@ from multi_armed_bandits import *
 """
  Base class of an autonomously acting and learning agent.
 """
+
 class Agent:
 
     def __init__(self, params):
@@ -22,6 +23,10 @@ class Agent:
     """
     def update(self, state, action, reward, next_state, terminated, truncated):
         pass
+    
+    def print(self):
+        for attribute, value in vars(self).items():
+            print(f"{attribute}: {value}")
         
 
 """
@@ -46,7 +51,7 @@ class TemporalDifferenceLearningAgent(Agent):
         self.Q_values = {}
         self.alpha = params["alpha"]
         self.epsilon_decay = params["epsilon_decay"]
-        self.epsilon = 1.0
+        self.epsilon = params["epsilon"]
         
     def Q(self, state):
         state = np.array2string(state)
@@ -96,10 +101,21 @@ class UCBQLearner(QLearner):
     def __init__(self, params):
         super(UCBQLearner, self).__init__(params)
         self.exploration_constant = params["exploration_constant"]
-        self.action_counts = np.array([0]*self.nr_actions)
+        self.action_counts = {}
+    
+    def get_action_counts(self, state):
+        state = np.array2string(state)
+        if state not in self.action_counts:
+            self.action_counts[state] = np.zeros(self.nr_actions)
+        return self.action_counts[state]
+    
+    def update_action_counts(self, state, action):
+        state = np.array2string(state)
+        self.action_counts[state][action] += 1
         
     def policy(self, state):
         Q_values = self.Q(state)
-        action = UCB1(Q_values, self.action_counts, exploration_constant=self.exploration_constant)
-        self.action_counts[action] += 1
+        action_counts = self.get_action_counts(state)
+        action = UCB1(Q_values, action_counts, exploration_constant=self.exploration_constant)
+        self.update_action_counts(state, action)
         return action
