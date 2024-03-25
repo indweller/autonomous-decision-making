@@ -1,27 +1,11 @@
 import rooms
 import random
 import agent as a
-import matplotlib.pyplot as plot
-import seaborn as sns
 import pandas as pd
 import sys
-from utils import save_agent, load_agent
+from utils import save_agent, load_agent, plot_returns
 import numpy as np
 
-def plot_returns(x,y):
-    plot.plot(x,y)
-    plot.title("Progress")
-    plot.xlabel("Episode")
-    plot.ylabel("Discounted Return")
-    plot.show()
-
-def plot_eval_returns(x, y):
-    df = pd.DataFrame(y)
-    df = df.melt(var_name="Episode", value_name="Discounted Return") # lineplot expects data in long format
-    sns.lineplot(x="Episode", y="Discounted Return", data=df, errorbar='ci', ci=95)
-    plot.axhline(y=0.8, color='black', linestyle='--')
-    plot.title("Evaluation returns")
-    plot.show()
 
 def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
     state = env.reset()
@@ -48,8 +32,13 @@ def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
     return discounted_return
   
 def train(env, agent, episodes):
-    returns = [episode(env, agent, nr_episode=i, verbose=True) for i in range(episodes)]
-    return returns
+    train_returns = []
+    for seed in range(no_seeds):
+        np.random.seed(seed)
+        random.seed(seed)
+        returns = [episode(env, agent, nr_episode=i, verbose=True) for i in range(episodes)]
+        train_returns.append(returns)
+    return np.array(train_returns)
 
 def evaluate(env, agent, runs, episodes):
     eval_returns = []
@@ -58,8 +47,7 @@ def evaluate(env, agent, runs, episodes):
         eval_returns.append(returns)
     return np.array(eval_returns)
 
-np.random.seed(42)
-random.seed(42)
+
 params = {}
 rooms_instance = sys.argv[1]
 env = rooms.load_env(f"layouts/{rooms_instance}.txt", f"{rooms_instance}.mp4")
@@ -79,19 +67,19 @@ agent = a.UCBQLearner(params)
 training_episodes = 200
 evaluation_episodes = 10
 no_runs = 100
+no_seeds= 3
 
 # TRAINING
 returns = train(env, agent, training_episodes)
-plot_returns(x=range(training_episodes),y=returns)
+plot_returns(x=range(training_episodes),y=returns, eval=False)
 # save_agent(agent)
-# exit()
 
 # EVALUATION
 # agent = load_agent("saved_agents/agent: 2024-03-19 13:01:51.pkl")
 eval_returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
-plot_eval_returns(x=range(evaluation_episodes), y=eval_returns)
+plot_returns(x=range(evaluation_episodes), y=eval_returns)
 
 print(f"Average evaluation discounted return: {np.mean(eval_returns)}")
 
 
-env.save_video()
+# env.save_video()
