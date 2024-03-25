@@ -33,19 +33,23 @@ def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
   
 def train(env, agent, episodes):
     train_returns = []
+    eval_returns = []
     for seed in range(no_seeds):
         np.random.seed(seed)
         random.seed(seed)
         returns = [episode(env, agent, nr_episode=i, verbose=True) for i in range(episodes)]
         train_returns.append(returns)
-    return np.array(train_returns)
+        returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
+        eval_returns.append(returns)
+    print(np.array(train_returns).shape)
+    return np.array(train_returns), np.array(eval_returns).reshape(no_seeds, no_runs*evaluation_episodes)
 
 def evaluate(env, agent, runs, episodes):
     eval_returns = []
-    for i in range(no_runs):
+    for _ in range(no_runs):
         returns = [episode(env, agent, nr_episode=i, verbose=False, evaluation_mode=True) for i in range(episodes)]
         eval_returns.append(returns)
-    return np.array(eval_returns)
+    return eval_returns
 
 
 params = {}
@@ -70,14 +74,15 @@ no_runs = 100
 no_seeds= 3
 
 # TRAINING
-returns = train(env, agent, training_episodes)
-plot_returns(x=range(training_episodes),y=returns, eval=False)
+train_returns, eval_returns = train(env, agent, training_episodes)
+plot_returns(x=range(training_episodes), y=train_returns, eval=False)
+plot_returns(x=range(evaluation_episodes), y=eval_returns, eval=True)
 # save_agent(agent)
 
 # EVALUATION
 # agent = load_agent("saved_agents/agent: 2024-03-19 13:01:51.pkl")
-eval_returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
-plot_returns(x=range(evaluation_episodes), y=eval_returns)
+# eval_returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
+# plot_returns(x=range(evaluation_episodes), y=eval_returns)
 
 print(f"Average evaluation discounted return: {np.mean(eval_returns)}")
 
