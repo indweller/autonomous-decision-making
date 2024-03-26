@@ -41,8 +41,7 @@ def train(env, agent, episodes):
         train_returns.append(returns)
         returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
         eval_returns.append(returns)
-    print(np.array(train_returns).shape)
-    return np.array(train_returns), np.array(eval_returns).reshape(no_seeds, no_runs*evaluation_episodes)
+    return np.array(train_returns), np.array(eval_returns).reshape(no_seeds*no_runs, evaluation_episodes)
 
 def evaluate(env, agent, runs, episodes):
     eval_returns = []
@@ -69,22 +68,23 @@ params["epsilon"] = 1
 agent = a.UCBQLearner(params)
 
 training_episodes = 200
-evaluation_episodes = 10
+evaluation_episodes = 20
 no_runs = 100
 no_seeds= 3
 
 # TRAINING
 train_returns, eval_returns = train(env, agent, training_episodes)
-plot_returns(x=range(training_episodes), y=train_returns, eval=False)
-plot_returns(x=range(evaluation_episodes), y=eval_returns, eval=True)
+print(f"Trained for {training_episodes} episodes with {no_seeds} seeds.")
+print(f"Average training discounted return: {np.mean(train_returns)}")
+print(f"For each training seed, evaluated for {evaluation_episodes} episodes with {no_runs} runs.")
+print(f"Average evaluation discounted return: {np.mean(eval_returns)}")
+plot_returns(x=range(training_episodes), y=train_returns, evaluation_mode=False)
+plot_returns(x=range(evaluation_episodes), y=eval_returns, evaluation_mode=True)
 # save_agent(agent)
 
 # EVALUATION
 # agent = load_agent("saved_agents/agent: 2024-03-19 13:01:51.pkl")
 # eval_returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
 # plot_returns(x=range(evaluation_episodes), y=eval_returns)
-
-print(f"Average evaluation discounted return: {np.mean(eval_returns)}")
-
 
 # env.save_video()
