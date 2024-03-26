@@ -70,7 +70,7 @@ agent = a.UCBQLearner(params)
 training_episodes = 200
 evaluation_episodes = 20
 no_runs = 100
-no_seeds= 3
+no_seeds = 10
 
 # TRAINING
 train_returns, eval_returns = train(env, agent, training_episodes)
