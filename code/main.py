@@ -67,7 +67,7 @@ params["epsilon"] = 1
 # agent = a.QLearner(params)
 agent = a.UCBQLearner(params)
 
-training_episodes = 200
+training_episodes = 500
 evaluation_episodes = 20
 no_runs = 100
 no_seeds = 10
@@ -78,8 +78,8 @@ print(f"Trained for {training_episodes} episodes with {no_seeds} seeds.")
 print(f"Average training discounted return: {np.mean(train_returns)}")
 print(f"For each training seed, evaluated for {evaluation_episodes} episodes with {no_runs} runs.")
 print(f"Average evaluation discounted return: {np.mean(eval_returns)}")
-plot_returns(x=range(training_episodes), y=train_returns, evaluation_mode=False)
-plot_returns(x=range(evaluation_episodes), y=eval_returns, evaluation_mode=True)
+plot_returns(x=range(training_episodes), y=train_returns, evaluation_mode=False, instance=rooms_instance)
+plot_returns(x=range(evaluation_episodes), y=eval_returns, evaluation_mode=True, instance=rooms_instance)
 # save_agent(agent)
 
 # EVALUATION
@@ -87,4 +87,4 @@ plot_returns(x=range(evaluation_episodes), y=eval_returns, evaluation_mode=True)
 # eval_returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
 # plot_returns(x=range(evaluation_episodes), y=eval_returns)
 
-# env.save_video()
+env.save_video()

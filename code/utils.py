@@ -20,7 +20,7 @@ def load_agent(path, verbose=False):
     return agent
 
 
-def plot_returns(x, y, evaluation_mode=True):
+def plot_returns(x, y, evaluation_mode=True, instance="rooms_instance"):
     df = pd.DataFrame(y)
     df = df.melt(var_name="Episode", value_name="Discounted Return") # lineplot expects data in long format
     sns.lineplot(x="Episode", y="Discounted Return", data=df, errorbar=('ci', 95))
@@ -28,4 +28,5 @@ def plot_returns(x, y, evaluation_mode=True):
     plot.grid()
     plot.axhline(y=0.8, color='black', linestyle='--')
     plot.title("Evaluation returns") if evaluation_mode else plot.title("Training returns")
-    plot.show()
+    plot.savefig(f"{instance}_{'evaluation' if evaluation_mode else 'training'}_returns.png")
+    plot.close()
