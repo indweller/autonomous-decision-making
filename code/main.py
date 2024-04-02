@@ -8,12 +8,26 @@ import numpy as np
 
 
 def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
-    state = env.reset()
-    discounted_return = 0
-    discount_factor = 0.99
-    done = False
-    time_step = 0
-    if evaluation_mode:
+    """
+    Function to run a single episode of the reinforcement learning process.
+
+    Args:
+        env: The environment instance.
+        agent: The agent instance.
+        nr_episode: Episode number.
+        evaluation_mode: Flag indicating evaluation mode.
+        verbose: Flag indicating verbosity.
+
+    Returns:
+        discounted_return: Discounted return for the episode.
+    """
+    state = env.reset() # Reset the environment and get initial state
+    discounted_return = 0 # Initialize discounted return
+    discount_factor = 0.99 # Discount factor for future rewards
+    done = False # Flag indicating episode completion
+    time_step = 0  # Initialize time step
+
+    if evaluation_mode: # if evaluating set epsilon and exploration to 0 for consistency
         agent.epsilon = 0
         agent.exploration_constant = 0
     while not done:
@@ -32,20 +46,48 @@ def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
     return discounted_return
   
 def train(env, agent, episodes):
+    """
+    Function to train the agent over multiple episodes.
+
+    Args:
+        env: The environment instance.
+        agent: The agent instance.
+        episodes: Number of episodes to train on.
+
+    Returns:
+        train_returns: Returns from training episodes.
+        eval_returns: Returns from evaluation episodes.
+    """
     train_returns = []
     eval_returns = []
-    for seed in range(no_seeds):
+    for seed in range(no_seeds): # Loop through different random seeds
+        # set random seeds
         np.random.seed(seed)
-        random.seed(seed)
+        random.seed(seed) 
+         # Train on episodes and store returns
         returns = [episode(env, agent, nr_episode=i, verbose=True) for i in range(episodes)]
         train_returns.append(returns)
+        # Evaluate and store returns
         returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
         eval_returns.append(returns)
     return np.array(train_returns), np.array(eval_returns).reshape(no_seeds*no_runs, evaluation_episodes)
 
+# EVALUATION
 def evaluate(env, agent, runs, episodes):
+    """
+    Function to evaluate the agent over multiple episodes.
+
+    Args:
+        env: The environment instance.
+        agent: The agent instance.
+        runs: Number of runs for evaluation.
+        episodes: Number of episodes for each run.
+
+    Returns:
+        eval_returns: Returns from evaluation episodes.
+    """
     eval_returns = []
-    for _ in range(no_runs):
+    for _ in range(no_runs): 
         returns = [episode(env, agent, nr_episode=i, verbose=False, evaluation_mode=True) for i in range(episodes)]
         eval_returns.append(returns)
     return eval_returns
@@ -54,6 +96,8 @@ def evaluate(env, agent, runs, episodes):
 params = {}
 rooms_instance = sys.argv[1]
 env = rooms.load_env(f"layouts/{rooms_instance}.txt", f"{rooms_instance}.mp4")
+
+#  HYPER PARAMETERS
 params["nr_actions"] = env.action_space.n
 params["gamma"] = 0.99
 params["epsilon_decay"] = 0.0001
@@ -61,16 +105,18 @@ params["alpha"] = 0.1
 params["env"] = env
 params["exploration_constant"] = np.sqrt(2)
 params["epsilon"] = 1
+training_episodes = 200
+evaluation_episodes = 20
+no_runs = 100
+no_seeds = 10
 
+# AGENTS
 #agent = a.RandomAgent(params)
 # agent = a.SARSALearner(params)
 # agent = a.QLearner(params)
 agent = a.UCBQLearner(params)
 
-training_episodes = 200
-evaluation_episodes = 20
-no_runs = 100
-no_seeds = 10
+
 
 # TRAINING
 train_returns, eval_returns = train(env, agent, training_episodes)
@@ -87,4 +133,4 @@ plot_returns(x=range(evaluation_episodes), y=eval_returns, evaluation_mode=True,
 # eval_returns = evaluate(env, agent, runs=no_runs, episodes=evaluation_episodes)
 # plot_returns(x=range(evaluation_episodes), y=eval_returns)
 
-env.save_video()
+# env.save_video()
