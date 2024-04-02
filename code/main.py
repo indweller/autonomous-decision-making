@@ -67,7 +67,7 @@ params["epsilon"] = 1
 # agent = a.QLearner(params)
 agent = a.UCBQLearner(params)
 
-training_episodes = 500
+training_episodes = 200
 evaluation_episodes = 20
 no_runs = 100
 no_seeds = 10
