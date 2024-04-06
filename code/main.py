@@ -146,7 +146,7 @@ eval_returns = np.array(eval_returns)
 test_returns = np.array(test_returns).reshape(-1, test_episodes)
 
 plot_returns(train_returns, instance=rooms_instance, name="Training")
-plot_returns(eval_returns, instance=rooms_instance, name="Evaluation")
+plot_returns(eval_returns, evaluation_frequency=evaluation_frequency, instance=rooms_instance, name="Evaluation")
 plot_returns(test_returns, instance=rooms_instance, name="Testing")
 
 # env.save_video()

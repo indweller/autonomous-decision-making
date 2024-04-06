@@ -1,7 +1,7 @@
 import pickle
 from datetime import datetime
 import os
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 
@@ -42,7 +42,7 @@ def load_agent(path, verbose=False):
     return agent
 
 
-def plot_returns(y, instance="rooms_instance", name="returns"):
+def plot_returns(y, evaluation_frequency=1, instance="rooms_instance", name="returns"):
     """
     Function to plot the returns (discounted rewards) over episodes.
 
@@ -55,14 +55,16 @@ def plot_returns(y, instance="rooms_instance", name="returns"):
     """
     df = pd.DataFrame(y)
     df = df.melt(var_name="Episode", value_name="Discounted Return") # lineplot expects data in long format
+    df["Episode"] = evaluation_frequency*df["Episode"]
     sns.lineplot(x="Episode", y="Discounted Return", data=df, errorbar=('ci', 95))
 
-    if y.shape[1] < 25: 
-        plot.xticks(range(0, y.shape[1], 1))
+    if y.shape[1] < 25 and evaluation_frequency==1: 
+        plt.xticks(range(0, y.shape[1], 1))
     
-    plot.grid()
-    plot.axhline(y=0.8, color='black', linestyle='--')
-    plot.title(f"{name} returns")
+    plt.grid()
+    plt.axhline(y=0.8, color='black', linestyle='--')
+    plt.title(f"{name} returns")
+    plt.tight_layout()
     # plot.show()
-    plot.savefig(f"{instance}_{name}_returns.png", dpi=500)
-    plot.close()
+    plt.savefig(f"{instance}_{name}_returns.png", dpi=500)
+    plt.close()
