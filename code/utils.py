@@ -64,5 +64,5 @@ def plot_returns(y, instance="rooms_instance", name="returns"):
     plot.axhline(y=0.8, color='black', linestyle='--')
     plot.title(f"{name} returns")
     # plot.show()
-    plot.savefig(f"{instance}_{name}_returns.png")
+    plot.savefig(f"{instance}_{name}_returns.png", dpi=500)
     plot.close()

@@ -5,8 +5,8 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 import matplotlib.pyplot as plot
 import random
-# from moviepy.editor import VideoClip
-# from moviepy.video.io.bindings import mplfig_to_npimage
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
 
 MOVE_NORTH = 0
 MOVE_SOUTH = 1

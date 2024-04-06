@@ -138,10 +138,8 @@ for i in range(seeds):
     test_returns.append(i_test_returns)
 
     # save_agent(agent)
-    print(f"Trained for {training_episodes}. Average training discounted return: {np.mean(train_returns)}")
+    print(f"Trained for {training_episodes} episodes. Average training discounted return: {np.mean(train_returns)}")
     print(f"Tested for {test_runs} runs with {test_episodes} episodes each. Average test discounted return: {np.mean(test_returns)}")
-
-# env.save_video()
 
 train_returns = np.array(train_returns)
 eval_returns = np.array(eval_returns)
@@ -150,3 +148,5 @@ test_returns = np.array(test_returns).reshape(-1, test_episodes)
 plot_returns(train_returns, instance=rooms_instance, name="Training")
 plot_returns(eval_returns, instance=rooms_instance, name="Evaluation")
 plot_returns(test_returns, instance=rooms_instance, name="Testing")
+
+# env.save_video()
