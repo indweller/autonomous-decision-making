@@ -21,6 +21,7 @@ def save_agent(agent, filename="agent"):
     date_string = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
     with open(f"saved_agents/{filename}: {date_string}.pkl", 'wb') as file:
         pickle.dump(agent, file)
+    print(f"Agent saved at saved_agents/{filename}: {date_string}.pkl")
 
 def load_agent(path, verbose=False):
     """
@@ -33,6 +34,7 @@ def load_agent(path, verbose=False):
     Returns:
         agent: The loaded agent object.
     """
+    print(f"Loading agent from {path}")
     with open(path, 'rb') as file:
         agent = pickle.load(file)
     if verbose: 
@@ -40,14 +42,12 @@ def load_agent(path, verbose=False):
     return agent
 
 
-def plot_returns(x, y, evaluation_mode=True, instance="rooms_instance"):
+def plot_returns(y, instance="rooms_instance", name="returns"):
     """
     Function to plot the returns (discounted rewards) over episodes.
 
     Args:
-        x: X-axis data (e.g., episode numbers).
         y: Y-axis data (e.g., discounted returns).
-        evaluation_mode: Flag indicating evaluation mode (default is True).
         instance: Name of the instance/environment (default is "rooms_instance").
 
     Returns:
@@ -56,9 +56,13 @@ def plot_returns(x, y, evaluation_mode=True, instance="rooms_instance"):
     df = pd.DataFrame(y)
     df = df.melt(var_name="Episode", value_name="Discounted Return") # lineplot expects data in long format
     sns.lineplot(x="Episode", y="Discounted Return", data=df, errorbar=('ci', 95))
-    if evaluation_mode: plot.xticks(range(0, len(x), 1))
+
+    if y.shape[1] < 25: 
+        plot.xticks(range(0, y.shape[1], 1))
+    
     plot.grid()
     plot.axhline(y=0.8, color='black', linestyle='--')
-    plot.title("Evaluation returns") if evaluation_mode else plot.title("Training returns")
-    plot.savefig(f"{instance}_{'evaluation' if evaluation_mode else 'training'}_returns.png")
+    plot.title(f"{name} returns")
+    # plot.show()
+    plot.savefig(f"{instance}_{name}_returns.png")
     plot.close()
