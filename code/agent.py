@@ -117,5 +117,6 @@ class UCBQLearner(QLearner):
         Q_values = self.Q(state)
         action_counts = self.get_action_counts(state)
         action = UCB1(Q_values, action_counts, exploration_constant=self.exploration_constant)
-        self.update_action_counts(state, action)
+        if self.exploration_constant != 0:
+            self.update_action_counts(state, action)
         return action
