@@ -3,7 +3,7 @@ import random
 import agent as a
 import pandas as pd
 import sys
-from utils import save_agent, load_agent, plot_returns
+from utils import save_agent, load_agent, plot_returns, plot_value_map
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -30,9 +30,11 @@ def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
     if evaluation_mode: # if evaluating set epsilon and exploration to 0 for greedy policy
         agent.epsilon = 0
         agent.exploration_constant = 0
+        agent.temperature = 0
     else:
         agent.epsilon = params["epsilon"]
         agent.exploration_constant = params["exploration_constant"]
+        agent.temperature = params["temperature"]
 
     while not done:
         # 1. Select action according to policy
@@ -99,54 +101,72 @@ rooms_instance = sys.argv[1]
 #  HYPER PARAMETERS
 params = {}
 params["gamma"] = 0.99
-params["epsilon_decay"] = 0.0001
+params["epsilon_decay"] = 0.01
 params["alpha"] = 0.1
 params["exploration_constant"] = np.sqrt(2)
 params["epsilon"] = 1
+params["temperature"] = 1
 
 training_episodes = 200
 evaluation_episodes = 20
-evaluation_frequency = 10
+evaluation_frequency = 1
 test_runs = 10
 test_episodes = 20
 seeds = 10
-train_returns = []
-eval_returns = []
-test_returns = []
 
-for i in range(seeds):
-    print(f"Seed: {i}")
-    np.random.seed(i)
-    random.seed(i) 
-    env = rooms.load_env(f"layouts/{rooms_instance}.txt", f"{rooms_instance}.mp4")
-    params["nr_actions"] = env.action_space.n
-    params["env"] = env
+agents = [a.RandomAgent, a.QLearner, a.UCBQLearner, a.BoltzmannQLearner, a.SARSALearner, a.UCBSARSALearner, a.BoltzmannSARSALearner]
+agent_names = ["Random", "Eps-Q-learning", "UCB-Q-learning", "Boltzmann-Q-learning", "SARSA", "UCB-SARSA", "Boltzmann-SARSA"]
+# agents = [a.UCBQLearner]
+# agent_names = ["UCB-Q-learning"]
 
-    # AGENTS
-    # agent = a.RandomAgent(params)
-    # agent = a.SARSALearner(params)
-    # agent = a.QLearner(params)
-    agent = a.UCBQLearner(params)
-    # agent = load_agent("saved_agents/agent: 2024-04-05 18:33:40.pkl")
+agent_train_returns = []
+agent_eval_returns = []
+agent_test_returns = []
+for agent_class in agents:
+    train_returns = []
+    eval_returns = []
+    test_returns = []
+    for i in range(seeds):
+        print(f"Seed: {i}")
+        np.random.seed(i)
+        random.seed(i) 
+        env = rooms.load_env(f"layouts/{rooms_instance}.txt", f"{rooms_instance}.mp4")
+        params["nr_actions"] = env.action_space.n
+        params["env"] = env
 
-    # TRAINING
-    i_train_returns, i_eval_returns = train(env, agent, training_episodes, evaluation_frequency, evaluation_episodes, verbose=False)
-    train_returns.append(i_train_returns)
-    eval_returns.append(i_eval_returns)
-    # TESTING
-    i_test_returns = evaluate(env, agent, test_runs, test_episodes)
-    test_returns.append(i_test_returns)
+        # AGENTS
+        # agent = a.RandomAgent(params)
+        # agent = a.SARSALearner(params)
+        # agent = a.QLearner(params)
+        # agent = a.UCBQLearner(params)
+        # agent = a.BoltzmannQLearner(params)
+        # agent = a.UCBSARSALearner(params)
+        # agent = load_agent("saved_agents/agent: 2024-04-05 18:33:40.pkl")
+        agent = agent_class(params)
+        print(agent.__class__.__name__)
 
-    # save_agent(agent)
-    print(f"Trained for {training_episodes} episodes. Average training discounted return: {np.mean(train_returns)}")
-    print(f"Tested for {test_runs} runs with {test_episodes} episodes each. Average test discounted return: {np.mean(test_returns)}")
+        # TRAINING
+        i_train_returns, i_eval_returns = train(env, agent, training_episodes, evaluation_frequency, evaluation_episodes, verbose=False)
+        train_returns.append(i_train_returns)
+        eval_returns.append(i_eval_returns)
+        # TESTING
+        i_test_returns = evaluate(env, agent, test_runs, test_episodes)
+        test_returns.append(i_test_returns)
 
-train_returns = np.array(train_returns)
-eval_returns = np.array(eval_returns)
-test_returns = np.array(test_returns).reshape(-1, test_episodes)
+        # save_agent(agent)
+        print(f"Trained for {training_episodes} episodes. Average training discounted return: {np.mean(train_returns)}")
+        print(f"Tested for {test_runs} runs with {test_episodes} episodes each. Average test discounted return: {np.mean(test_returns)}")
+    train_returns = np.array(train_returns)
+    eval_returns = np.array(eval_returns)
+    test_returns = np.array(test_returns).reshape(-1, test_episodes)
+    agent_train_returns.append(train_returns)
+    agent_eval_returns.append(eval_returns)
+    agent_test_returns.append(test_returns)
 
-plot_returns(train_returns, instance=rooms_instance, name="Training")
-plot_returns(eval_returns, evaluation_frequency=evaluation_frequency, instance=rooms_instance, name="Evaluation")
-plot_returns(test_returns, instance=rooms_instance, name="Testing")
+plot_returns(agent_train_returns, instance=rooms_instance, name="Training", agent_names=agent_names)
+plot_returns(agent_eval_returns, evaluation_frequency=evaluation_frequency, instance=rooms_instance, name="Evaluation", agent_names=agent_names)
+plot_returns(agent_test_returns, instance=rooms_instance, name="Testing", agent_names=agent_names)
+
+plot_value_map(env, agent)
 
 # env.save_video()

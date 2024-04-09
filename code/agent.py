@@ -81,6 +81,52 @@ class SARSALearner(TemporalDifferenceLearningAgent):
             TD_target += self.gamma*Q_next
         TD_error = TD_target - Q_old
         self.Q(state)[action] += self.alpha*TD_error
+    
+class UCBSARSALearner(SARSALearner):
+    def __init__(self, params):
+        super(UCBSARSALearner, self).__init__(params)
+        self.exploration_constant = params["exploration_constant"]
+        self.action_counts = {}
+    
+    def get_action_counts(self, state):
+        state = np.array2string(state)
+        if state not in self.action_counts:
+            self.action_counts[state] = np.zeros(self.nr_actions)
+        return self.action_counts[state]
+    
+    def update_action_counts(self, state, action):
+        state = np.array2string(state)
+        self.action_counts[state][action] += 1
+        
+    def policy(self, state, look_ahead=False):
+        Q_values = self.Q(state)
+        action_counts = self.get_action_counts(state)
+        action = UCB1(Q_values, action_counts, exploration_constant=self.exploration_constant)
+        if self.exploration_constant != 0 and not look_ahead:
+            self.update_action_counts(state, action)
+        return action
+    
+    def update(self, state, action, reward, next_state, terminated, truncated):
+        self.decay_exploration()
+        Q_old = self.Q(state)[action]
+        TD_target = reward
+        if not terminated:
+            next_action = self.policy(next_state, look_ahead=True)
+            Q_next = self.Q(next_state)[next_action]
+            TD_target += self.gamma*Q_next
+        TD_error = TD_target - Q_old
+        self.Q(state)[action] += self.alpha*TD_error
+    
+class BoltzmannSARSALearner(SARSALearner):
+    def __init__(self, params):
+        super(BoltzmannSARSALearner, self).__init__(params)
+        self.temperature = params["temperature"]
+    
+    def policy(self, state):
+        Q_values = self.Q(state)
+        if self.temperature == 0:
+            return np.argmax(Q_values)
+        return boltzmann(Q_values, None, temperature=self.temperature)
         
 """
  Autonomous agent using off-policy Q-Learning.
@@ -120,3 +166,14 @@ class UCBQLearner(QLearner):
         if self.exploration_constant != 0:
             self.update_action_counts(state, action)
         return action
+
+class BoltzmannQLearner(QLearner):
+    def __init__(self, params):
+        super(BoltzmannQLearner, self).__init__(params)
+        self.temperature = params["temperature"]
+    
+    def policy(self, state):
+        Q_values = self.Q(state)
+        if self.temperature == 0:
+            return np.argmax(Q_values)
+        return boltzmann(Q_values, None, temperature=self.temperature)

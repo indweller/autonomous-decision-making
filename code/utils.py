@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 def save_agent(agent, filename="agent"):
     """
@@ -42,7 +43,7 @@ def load_agent(path, verbose=False):
     return agent
 
 
-def plot_returns(y, evaluation_frequency=1, instance="rooms_instance", name="returns"):
+def plot_returns(y, evaluation_frequency=1, instance="rooms_instance", name="returns", agent_names=""):
     """
     Function to plot the returns (discounted rewards) over episodes.
 
@@ -53,18 +54,51 @@ def plot_returns(y, evaluation_frequency=1, instance="rooms_instance", name="ret
     Returns:
         None
     """
-    df = pd.DataFrame(y)
-    df = df.melt(var_name="Episode", value_name="Discounted Return") # lineplot expects data in long format
-    df["Episode"] = evaluation_frequency*df["Episode"]
-    sns.lineplot(x="Episode", y="Discounted Return", data=df, errorbar=('ci', 95))
+    if agent_names != "":
+        for i in range(len(agent_names)):
+            df = pd.DataFrame(y[i])
+            df = df.melt(var_name="Episode", value_name="Discounted Return") # lineplot expects data in long format
+            df["Episode"] = evaluation_frequency*df["Episode"]
+            sns.lineplot(x="Episode", y="Discounted Return", data=df, errorbar=('ci', 95), label=agent_names[i])
+        y = y[-1]
 
     if y.shape[1] < 25 and evaluation_frequency==1: 
         plt.xticks(range(0, y.shape[1], 1))
     
+    plt.legend(loc='upper left')
     plt.grid()
     plt.axhline(y=0.8, color='black', linestyle='--')
     plt.title(f"{name} returns")
     plt.tight_layout()
-    # plot.show()
     plt.savefig(f"{instance}_{name}_returns.png", dpi=500)
+    # plt.show()
     plt.close()
+
+def plot_value_map(env, agent):
+    states = env.get_all_states()
+    value_map = states[0][2]
+    value_map[value_map == 1] = -1
+    value_dirs = np.zeros(value_map.shape, dtype=int)
+    dirs = ["R", "L", "U", "D"]
+    for s in states:
+        q = agent.Q(s)
+        index = np.where(s[0] == 1)
+        value_map[index[0][0]][index[1][0]] = max(q)
+        value_dirs[index[0][0]][index[1][0]] = np.argmax(q)
+    goal_index = np.where(states[0][1] == 1)
+    value_map[goal_index[0][0]][goal_index[1][0]] = 1
+    fig, ax = plt.subplots(figsize=(30, 30))
+    ax.clear()
+    ax.grid(False)
+    ax.imshow(value_map)
+    ax.tick_params(axis='both', which='both', bottom=False, top=False, left=False, right=False, labelleft=False, labelbottom=False)
+    for (i, j), v_s in np.ndenumerate(value_map):
+        if v_s == -1:
+            continue
+        ax.text(j, i, '{:0.4f}'.format(v_s) + f"\n{dirs[value_dirs[int(i)][int(j)]]}", ha='center', va='center', fontsize=7, bbox=dict(boxstyle='round', facecolor='white', edgecolor='0.03'))
+    plt.tight_layout()
+    # np.set_printoptions(formatter={'float': lambda x: "{0:0.6f}".format(x)})
+    plt.show()
+    # print(value_map)
+    fig.savefig(f"{agent.__class__.__name__}_value_map.png", dpi=500)
+    # plt.close()

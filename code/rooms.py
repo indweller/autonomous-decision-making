@@ -60,6 +60,16 @@ class RoomsEnv(gym.Env):
             state[OBSTACLE_CHANNEL][x][y] = 1
         return state
 
+    def get_all_states(self):
+        state_list = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if (i, j) not in self.obstacles:
+                    self.agent_position = (i, j)
+                    state = self.state()
+                    state_list.append(state)
+        return state_list
+
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
