@@ -28,13 +28,12 @@ def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
     time_step = 0  # Initialize time step
 
     if evaluation_mode: # if evaluating set epsilon and exploration to 0 for greedy policy
+        prev_epsilon = getattr(agent, "epsilon", 0) # Reset it after evaluation
+        prev_exploration_constant = getattr(agent, "exploration_constant", 0)
+        prev_temperature = getattr(agent, "temperature", 0)
         agent.epsilon = 0
         agent.exploration_constant = 0
         agent.temperature = 0
-    else:
-        agent.epsilon = params["epsilon"]
-        agent.exploration_constant = params["exploration_constant"]
-        agent.temperature = params["temperature"]
 
     while not done:
         # 1. Select action according to policy
@@ -49,6 +48,10 @@ def episode(env, agent, nr_episode=0, evaluation_mode=False, verbose=True):
         discounted_return += (discount_factor**time_step)*reward
         time_step += 1
     if verbose: print(nr_episode, ":", discounted_return, "steps: ", time_step)
+    if evaluation_mode: # reset epsilon and exploration after evaluation
+        agent.epsilon = prev_epsilon
+        agent.exploration_constant = prev_exploration_constant
+        agent.temperature = prev_temperature
     return discounted_return
   
 def train(env, agent, episodes, evaluation_frequency=10, evaluation_episodes=20, verbose=True):
@@ -101,7 +104,7 @@ rooms_instance = sys.argv[1]
 #  HYPER PARAMETERS
 params = {}
 params["gamma"] = 0.99
-params["epsilon_decay"] = 0.01
+params["epsilon_decay"] = 0.001
 params["alpha"] = 0.1
 params["exploration_constant"] = np.sqrt(2)
 params["epsilon"] = 1
