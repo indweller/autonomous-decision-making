@@ -78,7 +78,7 @@ def plot_value_map(env, agent, instance="rooms_instance"):
     value_map = states[0][2].copy()
     value_map[value_map == 1] = -1
     value_dirs = np.zeros(value_map.shape, dtype=int)
-    dirs = ["R", "L", "U", "D"]
+    dirs = ["D", "U", "L", "R"]
     for s in states:
         q = agent.Q(s)
         index = np.where(s[0] == 1)
@@ -89,12 +89,12 @@ def plot_value_map(env, agent, instance="rooms_instance"):
     fig, ax = plt.subplots(figsize=(30, 30))
     ax.clear()
     ax.grid(False)
-    ax.imshow(value_map)
+    ax.imshow(value_map.T)
     ax.tick_params(axis='both', which='both', bottom=False, top=False, left=False, right=False, labelleft=False, labelbottom=False)
     for (i, j), v_s in np.ndenumerate(value_map):
         if v_s == -1:
             continue
-        ax.text(j, i, '{:0.4f}'.format(v_s) + f"\n{dirs[value_dirs[int(i)][int(j)]]}", ha='center', va='center', fontsize=7, bbox=dict(boxstyle='round', facecolor='white', edgecolor='0.03'))
+        ax.text(i, j, '{:0.4f}'.format(v_s) + f"\n{dirs[value_dirs[int(i)][int(j)]]}", ha='center', va='center', fontsize=7, bbox=dict(boxstyle='round', facecolor='white', edgecolor='0.03'))
     plt.tight_layout()
     # np.set_printoptions(formatter={'float': lambda x: "{0:0.6f}".format(x)})
     plt.show()
