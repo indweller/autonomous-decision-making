@@ -65,7 +65,6 @@ def plot_returns(y, evaluation_frequency=1, instance="rooms_instance", name="ret
     if y.shape[1] < 25 and evaluation_frequency==1: 
         plt.xticks(range(0, y.shape[1], 1))
     
-    plt.legend(loc='upper left')
     plt.grid()
     plt.axhline(y=0.8, color='black', linestyle='--')
     plt.title(f"{name} returns")
@@ -74,9 +73,9 @@ def plot_returns(y, evaluation_frequency=1, instance="rooms_instance", name="ret
     # plt.show()
     plt.close()
 
-def plot_value_map(env, agent):
+def plot_value_map(env, agent, instance="rooms_instance"):
     states = env.get_all_states()
-    value_map = states[0][2]
+    value_map = states[0][2].copy()
     value_map[value_map == 1] = -1
     value_dirs = np.zeros(value_map.shape, dtype=int)
     dirs = ["R", "L", "U", "D"]
@@ -100,5 +99,5 @@ def plot_value_map(env, agent):
     # np.set_printoptions(formatter={'float': lambda x: "{0:0.6f}".format(x)})
     plt.show()
     # print(value_map)
-    fig.savefig(f"{agent.__class__.__name__}_value_map.png", dpi=500)
+    fig.savefig(f"{agent.__class__.__name__}_value_map_{instance}.png", dpi=500)
     # plt.close()

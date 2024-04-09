@@ -109,13 +109,13 @@ params["temperature"] = 1
 
 training_episodes = 200
 evaluation_episodes = 20
-evaluation_frequency = 1
+evaluation_frequency = 10
 test_runs = 10
 test_episodes = 20
-seeds = 10
+seeds = 5
 
 agents = [a.RandomAgent, a.QLearner, a.UCBQLearner, a.BoltzmannQLearner, a.SARSALearner, a.UCBSARSALearner, a.BoltzmannSARSALearner]
-agent_names = ["Random", "Eps-Q-learning", "UCB-Q-learning", "Boltzmann-Q-learning", "SARSA", "UCB-SARSA", "Boltzmann-SARSA"]
+agent_names = ["Random", "Eps-Q-learning", "UCB-Q-learning", "Boltzmann-Q-learning", "Eps-SARSA", "UCB-SARSA", "Boltzmann-SARSA"]
 # agents = [a.UCBQLearner]
 # agent_names = ["UCB-Q-learning"]
 
@@ -167,6 +167,6 @@ plot_returns(agent_train_returns, instance=rooms_instance, name="Training", agen
 plot_returns(agent_eval_returns, evaluation_frequency=evaluation_frequency, instance=rooms_instance, name="Evaluation", agent_names=agent_names)
 plot_returns(agent_test_returns, instance=rooms_instance, name="Testing", agent_names=agent_names)
 
-plot_value_map(env, agent)
+plot_value_map(env, agent, instance=rooms_instance)
 
 # env.save_video()

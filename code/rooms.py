@@ -62,8 +62,8 @@ class RoomsEnv(gym.Env):
 
     def get_all_states(self):
         state_list = []
-        for i in range(self.height):
-            for j in range(self.width):
+        for i in range(self.width):
+            for j in range(self.height):
                 if (i, j) not in self.obstacles:
                     self.agent_position = (i, j)
                     state = self.state()
