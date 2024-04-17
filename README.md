@@ -35,4 +35,4 @@ cd code
 python main.py <map-name>
 ```
 
-Our code creates comparative results for every agent, which can be time consuming. The agents evaluated are stored in the `agents` variable in main. Similarly, you can reduce the number of seeds or evaluations per epsiode by augmenting the `seeds` and `evaluation_frequency`, respectively. We suggest 200 training runs for medium maps and at least 500 runs for hard maps.
+Our code creates comparative results for every agent, which can be time consuming. The agents evaluated are stored in the `agents` variable in main. Similarly, you can reduce the number of seeds or frequency of evaluation by augmenting the `seeds` and `evaluation_frequency`, respectively. We suggest 200 training runs for medium maps and at least 500 runs for hard maps. To alter the parameters and the agents to be trained, refer to `main.py`. 

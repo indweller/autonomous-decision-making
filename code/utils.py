@@ -96,7 +96,6 @@ def plot_value_map(env, agent, instance="rooms_instance"):
             continue
         ax.text(i, j, '{:0.4f}'.format(v_s) + f"\n{dirs[value_dirs[int(i)][int(j)]]}", ha='center', va='center', fontsize=7, bbox=dict(boxstyle='round', facecolor='white', edgecolor='0.03'))
     plt.tight_layout()
-    # np.set_printoptions(formatter={'float': lambda x: "{0:0.6f}".format(x)})
     plt.show()
     # print(value_map)
     fig.savefig(f"{agent.__class__.__name__}_value_map_{instance}.png", dpi=500)
