@@ -35,4 +35,6 @@ cd code
 python main.py <map-name>
 ```
 
-Our code creates comparative results for every agent, which can be time consuming. The agents evaluated are stored in the `agents` variable in main. Similarly, you can reduce the number of seeds or frequency of evaluation by augmenting the `seeds` and `evaluation_frequency`, respectively. We suggest 200 training runs for medium maps and at least 500 runs for hard maps. To alter the parameters and the agents to be trained, refer to `main.py`. 
+The current version of the code creates comparative results for every agent, which can be time consuming. The agents evaluated are stored in the `agents` variable in `main.py`. For shorter run times, you can reduce the `test_runs`, `seeds` and `evaluation_frequency`. We suggest 200 training episodes for medium maps and 500 episodes for hard maps. All the parameters and the agents to be trained, can be set in the `main.py` file. 
+
+Our proposed algorithm is `UCBQLearner` - for which you can find the plots and videos in `code/`. The results were obtained with `training_episodes = 200, evaluation_episodes = 20, evaluation_frequency = 10, test_runs = 100, test_episodes = 20, seeds = 10`.
